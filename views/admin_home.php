@@ -133,7 +133,7 @@
               <tr v-for="(item, index) in data">
                 <td>
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" @click="onSelect(item, index)" :id="'checkbox'+item.no_reg">
+                    <input class="form-check-input" type="checkbox" @click="onSelect(item, index)" :id="'checkbox'+index">
                   </div>
                 </td>
                 <td>{{index+1}}</td>
@@ -392,8 +392,8 @@
             })
           },
           onSelect(v, index){
-            console.log($("#checkbox"+v.no_reg).is(":checked"));
-            if ($("#checkbox"+v.no_reg).is(":checked")) {
+            console.log($("#checkbox"+index).is(":checked"));
+            if ($("#checkbox"+index).is(":checked")) {
               this.selected_data.push(v);
             }else {
               this.selected_data = this.selected_data.filter(data => data.no_reg != v.no_reg);
@@ -409,17 +409,21 @@
                 const bodyFormData = new FormData();
                 let count=0;
                 this.selected_data.forEach((item) => {
-                  count++;
-                  $("#checkbox"+item.no_reg).prop('checked', false);
+                  $("#checkbox"+count).prop('checked', false);
                   bodyFormData.append("data[]", JSON.stringify(item));
+                  count++;
                 });
 
                 axios.post('/admin/data/delete/multiple', bodyFormData)
                 .then(response => {
                   console.log(response.data);
                   if (response.data.success) {
-                    this.selected_data = [];
                     this.refreshData();
+                    this.selected_data.forEach((item) => {
+                      $("#checkbox"+this.data.indexOf(item)).prop('checked', false);
+                    });
+                    this.selected_data = [];
+                    console.log("Total Selected Row: "+this.selected_data.length);
                     toastr.success(count+" data deleted successfully!")
                   }
                 });
